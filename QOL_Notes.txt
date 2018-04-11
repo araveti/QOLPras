@@ -1,0 +1,16 @@
+Commands to Install QOL
+
+cd quality-of-life-dashboard-master
+npm install
+npm run build
+npm run datagen
+npm start
+
+
+
+Always start MongoDB C:\Program Files\MongoDB\Server\3.2\bin\mongod.exe
+
+
+MongoDB Object
+
+npm start to launch Mongo Db ui

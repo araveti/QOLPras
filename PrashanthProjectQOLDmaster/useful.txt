@@ -1,0 +1,39 @@
+
+//-----------------------------------------------------------------------------------------------------
+console.log("_____________________DYNAMIC_COLUMN______________________________________________");
+		  	columns = [""+dataArr[0].col1, ""+dataArr[0].col2];
+		  	stoa({
+		   file: "uploads/"+filename,
+		   columns: columns
+		}, function (err, resultex) {
+		  if(err)
+		  {
+		  	console.log(err);
+		  }
+		  else
+		  {
+		  	dataArr = resultex;
+		  	console.log(dataArr);
+		  	console.log("----------------------------------");
+		  }
+		});
+______________________________________________________________________________________________________________
+
+//----------------------------------------------------------------------------------------------------------
+stoa({
+		   file: "uploads/"+filename,
+		   columns: columns
+		}, function (err, resultex) {
+		  if(err)
+		  {
+		  	console.log(err);
+		  }
+		  else
+		  {
+		  	dataArr = resultex;
+		  	console.log(dataArr);
+		  	console.log("----------------------------------");
+		  	console.log("col1 name "+dataArr[0].col1+"col2 name "+dataArr[0].col2);
+		  }
+		});
+______________________________________________________________________________________________________________

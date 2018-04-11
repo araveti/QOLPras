@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Landing page QOL</title>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.css">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.js"></script>
+	<style type="text/css">
+		.mrgin{
+			margin: 10% 3% 3% 3%;
+		}
+		.row{
+			margin: 1% 1% 1% 1%;
+		}
+	
+	</style>
+	<script type="text/javascript">
+		function warn()
+		{
+			alert("Do you really want to remove all the data in database!");
+		}
+	</script>
+</head>
+<body>
+	<div class="ui fixed inverted menu">
+            <div class="ui container">
+                <div class="header item"><i class="code icon"></i>Landing page QOL</div>
+                <a href="/" class="item">Home</a>
+            </div>
+        </div>
+
+
+<div class="mrgin">
+	
+<div class="ui center aligned grid">
+	<div class="eight wide column">
+		<div class="">	
+			<div class="row">
+			<a href="/testhome"><button class="ui black fluid button">Insert City Data</button></a>				
+			</div>
+			<div class="row">
+			<a href="/update"><button class="ui black fluid button">Update City Data</button></a>			
+			</div>
+			<div class="row">
+			<a href="/removedb"><button onclick="warn()" class="ui black fluid button">Remove Data from MongoDB</button></a>			
+			</div>
+		</div>
+</div>
+</div>
+</div>
+</body>
+</html>

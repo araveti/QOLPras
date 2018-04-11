@@ -1,0 +1,171 @@
+<template lang="html">
+    <div v-show="sharedState.metric.years.length > 1" class="qol-chart mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--4-col mdl-cell--12-col-tablet mdl-cell--12-col-desktop mdl-typography--text-center">
+        <div class="trendchart">
+            <h1 v-if="sharedState.metric.config">{{ sharedState.metric.config.title }}</h1>
+            <span class="legend"><i class="material-icons legend-county">trending_up</i> City</span>
+            <span v-show="sharedState.selected.length > 0" class="legend"><i class="material-icons legend-selected">trending_up</i> Selected</span>
+            <div class="ct-trendchart"></div>
+        </div>
+    </div>
+</template>
+
+<script>
+import Chartist from 'chartist';
+import {calcValue} from '../modules/metric_calculations';
+import {abbrNum, round} from '../modules/number_format';
+
+export default {
+    name: 'sc-trendchart',
+    watch: {
+        'sharedState.metric.data': 'renderChart',
+        'sharedState.selected': 'renderChart'
+    },
+    methods: {
+        renderChart: function() {
+            if (this.sharedState.metric.years.length > 1) {
+                let _this = this;
+                let data = this.updateData();
+
+                let options = {
+                    fullWidth: true,
+                    height: '160px',
+                    showArea: false,
+                    chartPadding: {
+                        right: 40
+                    },
+                    lineSmooth: Chartist.Interpolation.cardinal({
+                        fillHoles: true,
+                    }),
+                    axisY: {
+                        labelInterpolationFnc: function(value, index) {
+                            return abbrNum(round(Number(value), 2), 2);
+                        }
+                    },
+                    axisX: {
+                        labelInterpolationFnc: function(value, index) {
+                            let len = _this.sharedState.metric.years[_this.sharedState.metric.years.length - 1] - _this.sharedState.metric.years[0];
+                            if (len > 6) {
+                                return index % 2 === 0 ? value : null;
+                            } else {
+                                return value;
+                            }
+                        }
+                    }
+                };
+
+                // set range from 0 to 100 for percentages
+                if (this.sharedState.metric.config.suffix && this.sharedState.metric.config.suffix === '%') {
+                    options.high = 100;
+                }
+
+                this.privateState.chart = new Chartist.Line('.ct-trendchart', data, options);
+
+                // animation
+                this.privateState.chart.on('draw', function(data) {
+                    if(data.type === 'line') {
+                        data.element.animate({
+                            d: {
+                            begin: 500 * data.index,
+                            dur: 500,
+                            from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
+                            to: data.path.clone().stringify(),
+                            easing: Chartist.Svg.Easing.easeOutQuint
+                            },
+                            opacity: {
+                            begin: 500 * data.index,
+                            dur: 500,
+                            from: 0,
+                            to: 1
+                            }
+                        });
+                    }
+                });
+
+            } else {
+                if (this.privateState.chart) {
+                    this.privateState.chart.detach();
+                    this.privateState.chart = null;
+                }
+            }
+        },
+        updateData: function() {
+            // for filling in missing years
+            let minYear = this.sharedState.metric.years[0];
+            let maxYear = this.sharedState.metric.years[this.sharedState.metric.years.length - 1];
+            let yearsLength = parseInt(maxYear) - parseInt(minYear) + 1;
+            let filledYears = Array.apply(0, Array(yearsLength)).map(function(_,b) { return b + parseInt(minYear) });
+
+            let chartData = {
+                labels: filledYears,
+                series: []
+            };
+
+            // county values
+            let keys = Object.keys(this.sharedState.metric.data.map);
+            let areaArray = [];
+            let metric = this.sharedState.metric;
+
+            // county value
+            for (let i = 0; i < chartData.labels.length; i++) {
+                let areaValue = null;
+                if (this.sharedState.metric.years.indexOf(chartData.labels[i].toString()) !== -1) {
+                    if (metric.config.world_val && metric.config.world_val[`y_${chartData.labels[i]}`]) {
+                        areaValue = metric.config.world_val[`y_${chartData.labels[i]}`];
+                    } else {
+                        areaValue = calcValue(this.sharedState.metric.data, this.sharedState.metric.config.type, chartData.labels[i], keys);
+                    }
+                }
+                areaArray.push(areaValue);
+            }
+            chartData.series.push(areaArray);
+
+            // selected values
+            if (this.sharedState.selected.length > 0) {
+                let selectedArray = [];
+                for (let i = 0; i < chartData.labels.length; i++) {
+                    if (this.sharedState.metric.years.indexOf(chartData.labels[i].toString()) !== -1) {
+                        let selectedValue = calcValue(this.sharedState.metric.data, this.sharedState.metric.config.type, chartData.labels[i], this.sharedState.selected);
+                        selectedArray.push(selectedValue);
+                    } else {
+                        selectedArray.push(null);
+                    }
+                }
+                chartData.series.push(selectedArray);
+            }
+
+            return chartData;
+        }
+    }
+};
+</script>
+
+<style lang="css">
+.qol-chart .ct-series-b .ct-line, .qol-chart .ct-series-b .ct-point {
+    stroke: #003366;
+}
+.qol-chart .ct-series-a .ct-line, .qol-chart .ct-series-a .ct-point {
+    stroke: orange;
+}
+
+</style>
+
+<style lang="css" scoped>
+h1 {
+    font-size: 2em;
+    margin: 15px 0 0;
+}
+span.legend {
+    font-size: 1.5em;
+    color: black;
+}
+.material-icons {
+    vertical-align: middle;
+    font-size: 2em;
+}
+.legend-selected {
+    color: #003366;
+}
+.legend-county {
+    color: orange;
+}
+</style>
